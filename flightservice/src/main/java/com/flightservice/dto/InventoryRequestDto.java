@@ -34,7 +34,7 @@ public class InventoryRequestDto {
 	
 	@NotNull 
 	@Positive
-	private Double price;
+	private float price;
 	
 	@NotNull 
 	@Positive
