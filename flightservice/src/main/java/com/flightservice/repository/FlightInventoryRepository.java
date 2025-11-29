@@ -1,6 +1,7 @@
 package com.flightservice.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -14,7 +15,7 @@ public interface FlightInventoryRepository extends MongoRepository<FlightInvento
 	
 	Optional<FlightInventory> findByAirlineAndFlightIdAndSourceAndDestinationAndDepartureTime(String airline,String flightId,AIRPORT_NAME source,AIRPORT_NAME destination,LocalDateTime departureTime);
 	
-	FlightInventory findBySourceAndDestinationAndDepartureTimeBetween(AIRPORT_NAME source,AIRPORT_NAME destination,LocalDateTime start,LocalDateTime end);
-	
+	List<FlightInventory> findBySourceAndDestinationAndDepartureTimeBetween(AIRPORT_NAME source, AIRPORT_NAME destination, LocalDateTime start, LocalDateTime end);
+
 	FlightInventory findByFlightId(String flightId);
 }
