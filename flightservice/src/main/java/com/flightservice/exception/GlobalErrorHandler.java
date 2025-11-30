@@ -26,11 +26,11 @@ public class GlobalErrorHandler {
         return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST); 
     }
 	@ExceptionHandler(BadRequestException.class)
-	 @ResponseStatus(HttpStatus.BAD_REQUEST)
-	 public Map<String, String> handleRuntime(BadRequestException exception) {	
-		 Map<String, String> error = new HashMap<>();
-	     error.put("message", exception.getMessage());
-	     return error;
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public Map<String, String> handleRuntime(BadRequestException exception) {	
+		Map<String, String> error = new HashMap<>();
+	    error.put("message", exception.getMessage());
+	    return error;
 	 }
 	 
 	 @ExceptionHandler(NotFoundException.class)

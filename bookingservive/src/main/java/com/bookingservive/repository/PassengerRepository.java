@@ -1,0 +1,19 @@
+package com.bookingservive.repository;
+
+import org.springframework.data.mongodb.repository.Aggregation;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import org.springframework.stereotype.Repository;
+import com.bookingservive.model.Passenger;
+
+@Repository
+public interface PassengerRepository extends MongoRepository<Passenger, String> {
+
+    Passenger findByBookingId(String bookingId);
+    
+    @Aggregation(pipeline = {
+    	    "{ '$match': { 'flightInventoryId': ?0, 'status': 'BOOKED' }}",
+    	    "{ '$project': { '_id': 0, 'seatNumber': 1 }}"
+    })
+    String findSeatNumbersByFlightInventoryId(String flightInventoryId);
+}
