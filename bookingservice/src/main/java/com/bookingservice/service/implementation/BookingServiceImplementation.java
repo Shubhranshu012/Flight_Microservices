@@ -122,7 +122,6 @@ public class BookingServiceImplementation implements BookingService {
 
 	        ticketList.add(ticket);
 	    }
-
 	    return ticketList;
 	}
 
