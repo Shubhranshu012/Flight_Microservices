@@ -96,21 +96,21 @@ public class FlightServiceImplment implements FlightService {
     }
 	
 	public FlightInventory searchFlightBasedOnFlightNumber(String flightNumber){
-		FlightInventory inventory=inventoryRepo.findByFlightId(flightNumber);
-		if(inventory == null) {
+		Optional<FlightInventory> inventory=inventoryRepo.findById(flightNumber);
+		if(inventory.isEmpty()) {
 			throw new NotFoundException();
 		}
-		return inventory;
+		return inventory.get();
 	}
 	public String changeAvaliableSeat(String flightNumber, Integer seat) {
 
-	    FlightInventory currentInventory = inventoryRepo.findByFlightId(flightNumber);
+	    Optional<FlightInventory> currentInventory = inventoryRepo.findById(flightNumber);
 
-	    if (currentInventory == null) {
+	    if (currentInventory.isEmpty()) {
 	        throw new NotFoundException();
 	    }
-	    currentInventory.setAvailableSeats(seat);
-	    inventoryRepo.save(currentInventory);
+	    currentInventory.get().setAvailableSeats(seat);
+	    inventoryRepo.save(currentInventory.get());
 	    return "Available seats updated successfully for flight " + flightNumber;
 	}
 }

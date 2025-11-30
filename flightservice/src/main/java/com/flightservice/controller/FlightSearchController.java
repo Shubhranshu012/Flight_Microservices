@@ -19,7 +19,6 @@ import java.util.Map;
 @RestController
 public class FlightSearchController {
 	
-	
 	@Autowired
 	FlightServiceImplment inventoryService;
 	
@@ -28,12 +27,12 @@ public class FlightSearchController {
         return ResponseEntity.ok(inventoryService.searchFlights(dto));
     }  
     
-    @GetMapping("/api/flight/search/{flightNumber}")
-    public ResponseEntity<FlightInventory> searchFlight(@PathVariable String flightNumber) {
+    @GetMapping("/api/flight/search/{flightNumber}") 
+    public ResponseEntity<Object> searchFlight(@PathVariable String flightNumber) {
     	return ResponseEntity.status(HttpStatus.OK).body(inventoryService.searchFlightBasedOnFlightNumber(flightNumber));
     }
     @PutMapping("/api/flight/update/seat/{flightNumber}")
-    public ResponseEntity<Map<String, String>> searchFlight(@PathVariable String flightNumber,@RequestBody Integer seat) {
+    public ResponseEntity<Map<String, String>> updateAvailableSeat(@PathVariable String flightNumber,@RequestBody Integer seat) {
     	Map<String,String> responce=new HashMap<>();
     	responce.put("message",inventoryService.changeAvaliableSeat(flightNumber,seat));
     	return ResponseEntity.status(HttpStatus.OK).body(responce);

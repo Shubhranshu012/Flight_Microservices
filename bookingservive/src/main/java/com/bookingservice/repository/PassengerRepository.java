@@ -1,10 +1,11 @@
-package com.bookingservive.repository;
+package com.bookingservice.repository;
 
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
-import com.bookingservive.model.Passenger;
+
+import com.bookingservice.model.Passenger;
 
 @Repository
 public interface PassengerRepository extends MongoRepository<Passenger, String> {

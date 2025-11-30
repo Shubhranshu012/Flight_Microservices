@@ -17,5 +17,5 @@ public interface FlightInventoryRepository extends MongoRepository<FlightInvento
 	
 	List<FlightInventory> findBySourceAndDestinationAndDepartureTimeBetween(AIRPORT_NAME source, AIRPORT_NAME destination, LocalDateTime start, LocalDateTime end);
 
-	FlightInventory findByFlightId(String flightId);
+	Optional<FlightInventory> findById(String id);
 }

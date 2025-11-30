@@ -1,6 +1,6 @@
-package com.bookingservive.service;
+package com.bookingservice.service;
 
-import com.bookingservive.dto.BookingRequestDto;
+import com.bookingservice.dto.BookingRequestDto;
 
 public interface BookingService {
 	public Object bookTicket(String flightId, BookingRequestDto bookingDto);

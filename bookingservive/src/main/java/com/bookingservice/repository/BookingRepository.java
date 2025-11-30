@@ -1,11 +1,10 @@
-package com.bookingservive.repository;
+package com.bookingservice.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 
-import com.bookingservive.model.BOOKING_STATUS;
-import com.bookingservive.model.Booking;
+import com.bookingservice.model.BOOKING_STATUS;
+import com.bookingservice.model.Booking;
 
 
 @Repository

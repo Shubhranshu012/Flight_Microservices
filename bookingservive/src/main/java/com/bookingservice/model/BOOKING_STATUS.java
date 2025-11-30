@@ -1,4 +1,4 @@
-package com.bookingservive.model;
+package com.bookingservice.model;
 
 public enum BOOKING_STATUS {
 	BOOKED,CANCELLED,COMPLETED

@@ -22,5 +22,4 @@ public class AirlineInventoryController {
 		flightInplement.addInventory(inventoryDto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(null);
 	}
-
 }

@@ -1,4 +1,4 @@
-package com.bookingservive.model;
+package com.bookingservice.model;
 
 
 import org.springframework.data.annotation.Id;
@@ -15,13 +15,11 @@ public class Passenger {
 
     @Id
     private String id;
-
     private String name;
     private GENDER gender;
     private Integer age;
     private String seatNumber;
     private String mealOption;
-
     private String bookingId;  
     private String flightInventoryId;
 }
