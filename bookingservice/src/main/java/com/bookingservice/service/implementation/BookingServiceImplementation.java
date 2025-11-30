@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.bookingservice.dto.BookingRequestDto;
 import com.bookingservice.dto.FlightInventoryDto;
 import com.bookingservice.dto.PassengerDto;
+import com.bookingservice.exception.NotFoundException;
 import com.bookingservice.feign.FlightInterface;
 import com.bookingservice.model.BOOKING_STATUS;
 import com.bookingservice.model.Booking;
@@ -39,24 +40,22 @@ public class BookingServiceImplementation implements BookingService {
 	public Booking bookTicket(String inventoryId, BookingRequestDto bookingDto) {
 
 		String pnr = "PNR"+UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-
-		ResponseEntity<FlightInventoryDto> flightResponse = flightClient.searchFlight(inventoryId);
-		if (!flightResponse.getStatusCode().is2xxSuccessful() || flightResponse.getBody() == null) {
-			throw new RuntimeException("Flight not found: " + inventoryId);
+		ResponseEntity<FlightInventoryDto> flightResponse;
+		try {
+			flightResponse = flightClient.searchFlight(inventoryId);
+		}
+		catch(Exception exception) {
+			throw new NotFoundException();
 		}
 
 		FlightInventoryDto flightInventory = flightResponse.getBody();
 		System.out.println("Flight inventory: " + flightInventory);
 
-		Booking booking = Booking.builder()
-				.pnr(pnr)
-				.email(bookingDto.getEmail())
-				.bookingTime(LocalDateTime.now())
+		Booking booking = Booking.builder().pnr(pnr)
+				.email(bookingDto.getEmail()).bookingTime(LocalDateTime.now())
 				.departureTime(flightInventory.getDepartureTime())
-				.arrivalTime(flightInventory.getArrivalTime())
-				.flightInventoryId(inventoryId)
-				.status(BOOKING_STATUS.BOOKED)
-				.build();
+				.arrivalTime(flightInventory.getArrivalTime()).flightInventoryId(inventoryId)
+				.status(BOOKING_STATUS.BOOKED).build();
 
 		Booking savedBooking = bookingRepo.save(booking);
 
@@ -66,50 +65,41 @@ public class BookingServiceImplementation implements BookingService {
 
 		passengerRepo.saveAll(passengers);
 		int seatsToBook = bookingDto.getPassengers().size();
-		try {
-			ResponseEntity<Map<String, String>> updateResponse = flightClient.updateAvailableSeat(inventoryId, seatsToBook);
-			if (!updateResponse.getStatusCode().is2xxSuccessful()) {
-				System.err.println("Failed to update seat availability for flight: " + inventoryId);
-			}
-		} catch (Exception e) {
-			System.err.println("Error updating seat availability: " + e.getMessage());
-		}
-
+		flightClient.updateAvailableSeat(inventoryId, seatsToBook);
+		
 		return savedBooking;
 	}
 
 	private Passenger createPassenger(PassengerDto dto, String bookingId, String flightId) {
-	    return Passenger.builder()
-	            .bookingId(bookingId)
-	            .flightInventoryId(flightId)
-	            .name(dto.getName())
-	            .gender(GENDER.valueOf(dto.getGender().toUpperCase()))
-	            .age(dto.getAge())
-	            .seatNumber(dto.getSeatNumber())
-	            .mealOption(dto.getMealOption())
-	            .build();
+	    return Passenger.builder().bookingId(bookingId)
+	            .flightInventoryId(flightId).name(dto.getName()).gender(GENDER.valueOf(dto.getGender().toUpperCase())).age(dto.getAge())
+	            .seatNumber(dto.getSeatNumber()).mealOption(dto.getMealOption()).build();
 	}
 	public Object getHistory(String pnr) {
-		
-		Booking currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
-		if(currentBooking==null) {
-			return new RuntimeException("Not found");
+		Booking currentBooking;
+		try {
+			currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
+		}
+		catch(Exception exception) {
+			throw new NotFoundException();
 		}
 		List<Passenger> passengers = passengerRepo.findByBookingId(currentBooking.getId());
-	
+		
 		Map<String, Object> response = new HashMap<>();
-	    response.put("booking", currentBooking);
-	    response.put("passengers", passengers);
-	    return response;
+		response.put("booking", currentBooking);
+		response.put("passengers", passengers);
+		return response;
+
 	}
 	
 	public Object getTicket(String email) {
-
-	    List<Booking> bookings = bookingRepo.findByEmailAndStatus(email, BOOKING_STATUS.BOOKED);
-
-	    if (bookings == null || bookings.isEmpty()) {
-	        throw new RuntimeException("No bookings found for email: " + email);
-	    }
+		List<Booking> bookings ;
+		try {
+			bookings = bookingRepo.findByEmailAndStatus(email, BOOKING_STATUS.BOOKED);
+		}
+		catch(Exception exception) {
+			throw new NotFoundException();
+		}
 
 	    List<Map<String, Object>> ticketList = new ArrayList<>();
 
@@ -126,11 +116,13 @@ public class BookingServiceImplementation implements BookingService {
 	}
 
 	public Object cancelTicket(String pnr) {
-		Booking currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
-		
-		if (currentBooking == null) {
-	        throw new RuntimeException("Booking not found for PNR: " + pnr);    
-	    }
+		Booking currentBooking;
+		try {
+			currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
+		}
+		catch(Exception exception) {
+			throw new NotFoundException();
+		}
 		List<Passenger> passengers = passengerRepo.findByBookingId(currentBooking.getId());
 		int numberOfPassenger=passengers.size();
 		flightClient.updateAvailableSeat(currentBooking.getFlightInventoryId(),-numberOfPassenger);
