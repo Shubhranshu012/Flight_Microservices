@@ -2,6 +2,7 @@ package com.flightservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,7 @@ import com.flightservice.service.implementation.FlightServiceImplment;
 
 import jakarta.validation.Valid;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,10 +26,16 @@ public class FlightSearchController {
     @PostMapping("/api/flight/search")
     public ResponseEntity<Map<String, List<FlightInventory>>> search(@RequestBody @Valid SearchRequestDto dto) {
         return ResponseEntity.ok(inventoryService.searchFlights(dto));
-    }
+    }  
     
     @GetMapping("/api/flight/search/{flightNumber}")
-    public FlightInventory searchFlight(@PathVariable String flightNumber) {
-    	return inventoryService.searchFlightBasedOnFlightNumber(flightNumber);
+    public ResponseEntity<FlightInventory> searchFlight(@PathVariable String flightNumber) {
+    	return ResponseEntity.status(HttpStatus.OK).body(inventoryService.searchFlightBasedOnFlightNumber(flightNumber));
+    }
+    @PutMapping("/api/flight/update/seat/{flightNumber}")
+    public ResponseEntity<Map<String, String>> searchFlight(@PathVariable String flightNumber,@RequestBody Integer seat) {
+    	Map<String,String> responce=new HashMap<>();
+    	responce.put("message",inventoryService.changeAvaliableSeat(flightNumber,seat));
+    	return ResponseEntity.status(HttpStatus.OK).body(responce);
     }
 }

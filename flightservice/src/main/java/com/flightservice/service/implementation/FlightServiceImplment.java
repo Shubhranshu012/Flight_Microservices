@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.flightservice.dto.InventoryRequestDto;
 import com.flightservice.dto.SearchRequestDto;
+import com.flightservice.exception.BadRequestException;
+import com.flightservice.exception.NotFoundException;
 import com.flightservice.model.AIRPORT_NAME;
 import com.flightservice.model.Flight;
 import com.flightservice.model.FlightInventory;
@@ -31,26 +33,25 @@ public class FlightServiceImplment implements FlightService {
 	public FlightInventory addInventory(InventoryRequestDto inventoryDto) {
     	
     	if (inventoryDto.getAvailableSeats() > inventoryDto.getTotalSeats()) {
-            throw new RuntimeException("Available seats cannot be greater than total seats");
+            throw new BadRequestException("Available seats cannot be greater than total seats");
         }
     	if (inventoryDto.getArrivalTime().isBefore(inventoryDto.getDepartureTime())) {
-    	    throw new RuntimeException("Arrival time cannot be before departure time");
+    	    throw new BadRequestException("Arrival time cannot be before departure time");
     	}
     	if(inventoryDto.getFromPlace().equals(inventoryDto.getToPlace())) {
-    		throw new RuntimeException("From To Cant be Same");
+    		throw new BadRequestException("From To Cant be Same");
     	}
     	
     	Optional<FlightInventory> duplicate = inventoryRepo.findByAirlineAndFlightIdAndSourceAndDestinationAndDepartureTime(inventoryDto.getAirlineName(),inventoryDto.getFlightNumber(),AIRPORT_NAME.valueOf(inventoryDto.getFromPlace()),AIRPORT_NAME.valueOf(inventoryDto.getToPlace()),inventoryDto.getDepartureTime());
 
     	if (duplicate.isPresent()) {
-    	        throw new RuntimeException("Flight already exists with same details (airline, flightNumber, route, departureTime)");
+    	        throw new BadRequestException("Flight already exists with same details (airline, flightNumber, route, departureTime)");
     	}
     	
-    	Flight flight = flightRepo.findById(inventoryDto.getFlightNumber()).orElseGet(() -> {
-    			Flight f = Flight.builder().flightNumber(inventoryDto.getFlightNumber()).airlineName(inventoryDto.getAirlineName()).fromPlace(AIRPORT_NAME.valueOf(inventoryDto.getFromPlace())).toPlace(AIRPORT_NAME.valueOf(inventoryDto.getToPlace())).build();
-    			return flightRepo.save(f);
+    	flightRepo.findById(inventoryDto.getFlightNumber()).orElseGet(() -> {
+    			Flight newFlight = Flight.builder().flightNumber(inventoryDto.getFlightNumber()).airlineName(inventoryDto.getAirlineName()).fromPlace(AIRPORT_NAME.valueOf(inventoryDto.getFromPlace())).toPlace(AIRPORT_NAME.valueOf(inventoryDto.getToPlace())).build();
+    			return flightRepo.save(newFlight);
     	});
-
 
     	FlightInventory fi = FlightInventory.builder().flightId(inventoryDto.getFlightNumber()).departureTime(inventoryDto.getDepartureTime()).arrivalTime(inventoryDto.getArrivalTime()).price(inventoryDto.getPrice())
     			.totalSeats(inventoryDto.getTotalSeats()).availableSeats(inventoryDto.getAvailableSeats()).source(AIRPORT_NAME.valueOf(inventoryDto.getFromPlace())).destination(AIRPORT_NAME.valueOf(inventoryDto.getToPlace())).airline(inventoryDto.getAirlineName()).build();
@@ -68,7 +69,7 @@ public class FlightServiceImplment implements FlightService {
         List<FlightInventory> onwardFlights =inventoryRepo.findBySourceAndDestinationAndDepartureTimeBetween(AIRPORT_NAME.valueOf(dto.getFromPlace()),AIRPORT_NAME.valueOf(dto.getToPlace()),onwardStart,onwardEnd );
 
         if (onwardFlights.isEmpty()) {
-            throw new RuntimeException("No onward flights found");
+            throw new NotFoundException();
         }
 
         response.put("onwardFlights", onwardFlights);
@@ -76,7 +77,7 @@ public class FlightServiceImplment implements FlightService {
         if (dto.getTripType().equalsIgnoreCase("ROUND_TRIP")) {
 
             if (dto.getReturnDate() == null) {
-                throw new RuntimeException("Return date is required for ROUND_TRIP");
+                throw new BadRequestException("Return date is required for ROUND_TRIP");
             }
 
             LocalDateTime returnStart = dto.getReturnDate().atStartOfDay();
@@ -85,7 +86,7 @@ public class FlightServiceImplment implements FlightService {
             List<FlightInventory> returnFlights =inventoryRepo.findBySourceAndDestinationAndDepartureTimeBetween(AIRPORT_NAME.valueOf(dto.getToPlace()),AIRPORT_NAME.valueOf(dto.getFromPlace()),returnStart,returnEnd);
 
             if (returnFlights.isEmpty()) {
-                throw new RuntimeException("No return flights found");
+                throw new NotFoundException();
             }
 
             response.put("returnFlights", returnFlights);
@@ -96,6 +97,20 @@ public class FlightServiceImplment implements FlightService {
 	
 	public FlightInventory searchFlightBasedOnFlightNumber(String flightNumber){
 		FlightInventory inventory=inventoryRepo.findByFlightId(flightNumber);
+		if(inventory == null) {
+			throw new NotFoundException();
+		}
 		return inventory;
+	}
+	public String changeAvaliableSeat(String flightNumber, Integer seat) {
+
+	    FlightInventory currentInventory = inventoryRepo.findByFlightId(flightNumber);
+
+	    if (currentInventory == null) {
+	        throw new NotFoundException();
+	    }
+	    currentInventory.setAvailableSeats(seat);
+	    inventoryRepo.save(currentInventory);
+	    return "Available seats updated successfully for flight " + flightNumber;
 	}
 }
