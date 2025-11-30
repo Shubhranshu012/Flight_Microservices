@@ -109,7 +109,7 @@ public class FlightServiceImplment implements FlightService {
 	    if (currentInventory.isEmpty()) {
 	        throw new NotFoundException();
 	    }
-	    currentInventory.get().setAvailableSeats(seat);
+	    currentInventory.get().setAvailableSeats(currentInventory.get().getAvailableSeats()-seat);
 	    inventoryRepo.save(currentInventory.get());
 	    return "Available seats updated successfully for flight " + flightNumber;
 	}

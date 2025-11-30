@@ -1,6 +1,8 @@
 package com.bookingservice.service.implementation;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -86,6 +88,58 @@ public class BookingServiceImplementation implements BookingService {
 	            .seatNumber(dto.getSeatNumber())
 	            .mealOption(dto.getMealOption())
 	            .build();
+	}
+	public Object getHistory(String pnr) {
+		
+		Booking currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
+		if(currentBooking==null) {
+			return new RuntimeException("Not found");
+		}
+		List<Passenger> passengers = passengerRepo.findByBookingId(currentBooking.getId());
+	
+		Map<String, Object> response = new HashMap<>();
+	    response.put("booking", currentBooking);
+	    response.put("passengers", passengers);
+	    return response;
+	}
+	
+	public Object getTicket(String email) {
+
+	    List<Booking> bookings = bookingRepo.findByEmailAndStatus(email, BOOKING_STATUS.BOOKED);
+
+	    if (bookings == null || bookings.isEmpty()) {
+	        throw new RuntimeException("No bookings found for email: " + email);
+	    }
+
+	    List<Map<String, Object>> ticketList = new ArrayList<>();
+
+	    for (Booking booking : bookings) {
+	        List<Passenger> passengers =passengerRepo.findByBookingId(booking.getId());
+
+	        Map<String, Object> ticket = new HashMap<>();
+	        ticket.put("booking", booking);
+	        ticket.put("passengers", passengers);
+
+	        ticketList.add(ticket);
+	    }
+
+	    return ticketList;
+	}
+
+	public Object cancelTicket(String pnr) {
+		Booking currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
+		
+		if (currentBooking == null) {
+	        throw new RuntimeException("Booking not found for PNR: " + pnr);    
+	    }
+		List<Passenger> passengers = passengerRepo.findByBookingId(currentBooking.getId());
+		int numberOfPassenger=passengers.size();
+		flightClient.updateAvailableSeat(currentBooking.getFlightInventoryId(),-numberOfPassenger);
+		
+		currentBooking.setStatus(BOOKING_STATUS.valueOf("CANCELED"));
+		bookingRepo.save(currentBooking);
+		
+		return "";
 	}
 
 }

@@ -6,11 +6,11 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 
 import com.bookingservice.model.Passenger;
-
-@Repository
+import java.util.*
+;@Repository
 public interface PassengerRepository extends MongoRepository<Passenger, String> {
 
-    Passenger findByBookingId(String bookingId);
+    List<Passenger> findByBookingId(String bookingId);
     
     @Aggregation(pipeline = {
     	    "{ '$match': { 'flightInventoryId': ?0, 'status': 'BOOKED' }}",
