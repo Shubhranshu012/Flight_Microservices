@@ -89,7 +89,7 @@ class InventoryTest {
     void addInventory_timeError() throws Exception {
         InventoryRequestDto inventoryDto = buildValidDto();
         inventoryDto.setDepartureTime(LocalDateTime.now().plusDays(2));
-        inventoryDto.setArrivalTime(LocalDateTime.now().plusDays(1));;
+        inventoryDto.setArrivalTime(LocalDateTime.now().plusDays(1));
 
         mockMvc.perform(post("/api/flight/airline/inventory")
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(inventoryDto)))
