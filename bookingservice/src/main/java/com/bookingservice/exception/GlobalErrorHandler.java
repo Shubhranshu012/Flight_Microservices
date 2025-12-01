@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.flightservice.exception.BadRequestException;
-import com.flightservice.exception.NotFoundException;
 
 
 @ControllerAdvice
