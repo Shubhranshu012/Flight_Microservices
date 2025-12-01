@@ -36,6 +36,6 @@ public class GlobalErrorHandler {
 	 @ExceptionHandler(NotFoundException.class)
 	 @ResponseStatus(HttpStatus.NOT_FOUND)
 	 public String handleRuntime(NotFoundException exception) { 
-	     return null;
+	     return "";
 	 }
 }

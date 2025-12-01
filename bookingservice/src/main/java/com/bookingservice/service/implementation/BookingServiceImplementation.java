@@ -76,12 +76,10 @@ public class BookingServiceImplementation implements BookingService {
 	            .seatNumber(dto.getSeatNumber()).mealOption(dto.getMealOption()).build();
 	}
 	public Object getHistory(String pnr) {
-		Booking currentBooking;
-		try {
-			currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
-		}
-		catch(Exception exception) {
-			throw new NotFoundException();
+		Booking currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
+		
+		if (currentBooking == null) {
+		    throw new NotFoundException();
 		}
 		List<Passenger> passengers = passengerRepo.findByBookingId(currentBooking.getId());
 		
@@ -93,12 +91,10 @@ public class BookingServiceImplementation implements BookingService {
 	}
 	
 	public Object getTicket(String email) {
-		List<Booking> bookings ;
-		try {
-			bookings = bookingRepo.findByEmailAndStatus(email, BOOKING_STATUS.BOOKED);
-		}
-		catch(Exception exception) {
-			throw new NotFoundException();
+		List<Booking> bookings = bookingRepo.findByEmailAndStatus(email, BOOKING_STATUS.BOOKED);
+		
+		if (bookings.isEmpty()) {
+		    throw new NotFoundException();
 		}
 
 	    List<Map<String, Object>> ticketList = new ArrayList<>();
@@ -123,11 +119,14 @@ public class BookingServiceImplementation implements BookingService {
 		catch(Exception exception) {
 			throw new NotFoundException();
 		}
+		if (currentBooking == null) {
+		    throw new NotFoundException();
+		}
 		List<Passenger> passengers = passengerRepo.findByBookingId(currentBooking.getId());
 		int numberOfPassenger=passengers.size();
 		flightClient.updateAvailableSeat(currentBooking.getFlightInventoryId(),-numberOfPassenger);
 		
-		currentBooking.setStatus(BOOKING_STATUS.valueOf("CANCELED"));
+		currentBooking.setStatus(BOOKING_STATUS.valueOf("CANCELLED"));
 		bookingRepo.save(currentBooking);
 		
 		return "";
