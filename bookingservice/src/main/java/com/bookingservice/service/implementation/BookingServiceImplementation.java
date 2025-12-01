@@ -49,7 +49,7 @@ public class BookingServiceImplementation implements BookingService {
 			flightResponse = flightClient.searchFlight(inventoryId);
 		}
 		catch(Exception exception) {
-			throw new NotFoundException();
+			throw new NotFoundException("");
 		}
 
 		FlightInventoryDto flightInventory = flightResponse.getBody();
@@ -85,7 +85,7 @@ public class BookingServiceImplementation implements BookingService {
 		Booking currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
 		
 		if (currentBooking == null) {
-		    throw new NotFoundException();
+		    throw new NotFoundException("");
 		}
 		List<Passenger> passengers = passengerRepo.findByBookingId(currentBooking.getId());
 		
@@ -98,9 +98,9 @@ public class BookingServiceImplementation implements BookingService {
 	
 	public Object getTicket(String email) {
 		List<Booking> bookings = bookingRepo.findByEmailAndStatus(email, BOOKING_STATUS.BOOKED);
-		
-		if (bookings.isEmpty()) {
-		    throw new NotFoundException();
+		System.out.println(bookings);
+		if (bookings == null || bookings.isEmpty()) {
+		    throw new NotFoundException("");
 		}
 	    List<Map<String, Object>> ticketList = new ArrayList<>();
 
@@ -122,10 +122,10 @@ public class BookingServiceImplementation implements BookingService {
 			currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
 		}
 		catch(Exception exception) {
-			throw new NotFoundException();
+			throw new NotFoundException("");
 		}
 		if (currentBooking == null) {
-		    throw new NotFoundException();
+		    throw new NotFoundException("");
 		}
 		List<Passenger> passengers = passengerRepo.findByBookingId(currentBooking.getId());
 		int numberOfPassenger=passengers.size();

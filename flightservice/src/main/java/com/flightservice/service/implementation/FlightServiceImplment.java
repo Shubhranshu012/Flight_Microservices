@@ -45,8 +45,8 @@ public class FlightServiceImplment implements FlightService {
     	AIRPORT_NAME destination;
     	
     	try {
-    		source=AIRPORT_NAME.valueOf((inventoryDto.getToPlace()).toUpperCase());
-    		destination=AIRPORT_NAME.valueOf((inventoryDto.getFromPlace()).toUpperCase());
+    		source = AIRPORT_NAME.valueOf(inventoryDto.getFromPlace().toUpperCase());
+    		destination = AIRPORT_NAME.valueOf(inventoryDto.getToPlace().toUpperCase());
     	}catch (Exception exc) {
     		throw new BadRequestException("Invalid Source or Destination");
     	}
@@ -77,8 +77,8 @@ public class FlightServiceImplment implements FlightService {
     	AIRPORT_NAME destination;
     	
     	try {
-    		source=AIRPORT_NAME.valueOf((dto.getToPlace()).toUpperCase());
-    		destination=AIRPORT_NAME.valueOf((dto.getFromPlace()).toUpperCase());
+    		source = AIRPORT_NAME.valueOf(dto.getFromPlace().toUpperCase());
+    		destination = AIRPORT_NAME.valueOf(dto.getToPlace().toUpperCase());
     	}catch (Exception exc) {
     		throw new BadRequestException("Invalid Source or Destination");
     	}

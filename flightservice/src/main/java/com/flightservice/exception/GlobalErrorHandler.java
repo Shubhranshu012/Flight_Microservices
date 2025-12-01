@@ -9,7 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
+import com.flightservice.exception.BadRequestException;
+import com.flightservice.exception.NotFoundException;
 
 @ControllerAdvice
 public class GlobalErrorHandler {
@@ -31,11 +32,11 @@ public class GlobalErrorHandler {
 		Map<String, String> error = new HashMap<>();
 	    error.put("message", exception.getMessage());
 	    return error;
-	 }
+	}
 	 
-	 @ExceptionHandler(NotFoundException.class)
-	 @ResponseStatus(HttpStatus.NOT_FOUND)
-	 public String handleRuntime(NotFoundException exception) {
-	     return null;
-	 }
+	@ExceptionHandler(NotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public String handleRuntime(NotFoundException exception) {
+		return "";
+	}
 }
