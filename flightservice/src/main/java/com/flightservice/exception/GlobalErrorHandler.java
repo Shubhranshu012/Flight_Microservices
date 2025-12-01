@@ -27,16 +27,14 @@ public class GlobalErrorHandler {
         return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST); 
     }
 	@ExceptionHandler(BadRequestException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public Map<String, String> handleRuntime(BadRequestException exception) {	
-		Map<String, String> error = new HashMap<>();
-	    error.put("message", exception.getMessage());
-	    return error;
-	}
+    public ResponseEntity<Map<String, String>> handleResourceNotFound(BadRequestException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST); 
+    }
 	 
 	@ExceptionHandler(NotFoundException.class)
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public String handleRuntime(NotFoundException exception) {
-		return "";
-	}
+    public ResponseEntity<Void> handleResourceNotFound(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 }
