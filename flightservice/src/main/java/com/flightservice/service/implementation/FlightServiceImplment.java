@@ -67,18 +67,18 @@ public class FlightServiceImplment implements FlightService {
     	return inventoryRepo.save(fi);
     }
 	
-	public Map<String, List<FlightInventory>> searchFlights(SearchRequestDto dto) {
+	public Map<String, List<FlightInventory>> searchFlights(SearchRequestDto searchDto) {
 
         Map<String, List<FlightInventory>> response = new HashMap<>();
 
-        LocalDateTime onwardStart = dto.getJourneyDate().atStartOfDay();
-        LocalDateTime onwardEnd = dto.getJourneyDate().atTime(23, 59, 59);
+        LocalDateTime onwardStart = searchDto.getJourneyDate().atStartOfDay();
+        LocalDateTime onwardEnd = searchDto.getJourneyDate().atTime(23, 59, 59);
         AIRPORT_NAME source;
     	AIRPORT_NAME destination;
     	
     	try {
-    		source = AIRPORT_NAME.valueOf(dto.getFromPlace().toUpperCase());
-    		destination = AIRPORT_NAME.valueOf(dto.getToPlace().toUpperCase());
+    		source = AIRPORT_NAME.valueOf(searchDto.getFromPlace().toUpperCase());
+    		destination = AIRPORT_NAME.valueOf(searchDto.getToPlace().toUpperCase());
     	}catch (Exception exc) {
     		throw new BadRequestException("Invalid Source or Destination");
     	}
@@ -90,14 +90,14 @@ public class FlightServiceImplment implements FlightService {
 
         response.put("onwardFlights", onwardFlights);
 
-        if (dto.getTripType().equalsIgnoreCase("ROUND_TRIP")) {
+        if (searchDto.getTripType().equalsIgnoreCase("ROUND_TRIP")) {
 
-            if (dto.getReturnDate() == null) {
+            if (searchDto.getReturnDate() == null) {
                 throw new BadRequestException("Return date is required for ROUND_TRIP");
             }
 
-            LocalDateTime returnStart = dto.getReturnDate().atStartOfDay();
-            LocalDateTime returnEnd = dto.getReturnDate().atTime(23, 59, 59);
+            LocalDateTime returnStart = searchDto.getReturnDate().atStartOfDay();
+            LocalDateTime returnEnd = searchDto.getReturnDate().atTime(23, 59, 59);
 
             List<FlightInventory> returnFlights =inventoryRepo.findBySourceAndDestinationAndDepartureTimeBetween(source,destination,returnStart,returnEnd);
 

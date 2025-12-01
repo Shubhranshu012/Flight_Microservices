@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.bookingservice.dto.BookingRequestDto;
 import com.bookingservice.dto.FlightInventoryDto;
 import com.bookingservice.dto.PassengerDto;
+import com.bookingservice.exception.BadRequestException;
 import com.bookingservice.exception.NotFoundException;
 import com.bookingservice.feign.FlightInterface;
 import com.bookingservice.kafka.BookingProducer;
@@ -41,7 +42,7 @@ public class BookingServiceImplementation implements BookingService {
 	@Autowired
 	BookingProducer bookingProducer;
 
-	public Booking bookTicket(String inventoryId, BookingRequestDto bookingDto) {
+	public String bookTicket(String inventoryId, BookingRequestDto bookingDto) {
 
 		String pnr = "PNR"+UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 		ResponseEntity<FlightInventoryDto> flightResponse;
@@ -53,7 +54,9 @@ public class BookingServiceImplementation implements BookingService {
 		}
 
 		FlightInventoryDto flightInventory = flightResponse.getBody();
-		System.out.println("Flight inventory: " + flightInventory);
+		if(bookingDto.getPassengers().size() > flightInventory.getAvailableSeats()) {
+			throw new BadRequestException("No Seat Left");
+		}
 
 		Booking booking = Booking.builder().pnr(pnr)
 				.email(bookingDto.getEmail()).bookingTime(LocalDateTime.now())
@@ -72,7 +75,7 @@ public class BookingServiceImplementation implements BookingService {
 		
 		bookingProducer.sendBookingEmail(bookingDto.getEmail(),pnr);
 		
-		return savedBooking;
+		return pnr;
 	}
 
 	private Passenger createPassenger(PassengerDto dto, String bookingId, String flightId) {
@@ -127,6 +130,9 @@ public class BookingServiceImplementation implements BookingService {
 		if (currentBooking == null) {
 		    throw new NotFoundException("");
 		}
+		if(!currentBooking.getDepartureTime().isAfter(LocalDateTime.now().plusHours(24))) {
+			throw new BadRequestException("Depature is within 24 Hrs");
+		}
 		List<Passenger> passengers = passengerRepo.findByBookingId(currentBooking.getId());
 		int numberOfPassenger=passengers.size();
 		flightClient.updateAvailableSeat(currentBooking.getFlightInventoryId(),-numberOfPassenger);
@@ -136,5 +142,4 @@ public class BookingServiceImplementation implements BookingService {
 		
 		return "";
 	}
-
 }

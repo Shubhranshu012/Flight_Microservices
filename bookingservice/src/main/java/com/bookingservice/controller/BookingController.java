@@ -22,9 +22,9 @@ public class BookingController {
 	BookingServiceImplementation bookingService;
 
 	@PostMapping("/api/flight/booking/{flightId}")
-	public ResponseEntity<Booking> book(@PathVariable String flightId, @RequestBody @Valid BookingRequestDto bookingDto) {
-		Booking booking = bookingService.bookTicket(flightId, bookingDto);
-		return ResponseEntity.status(HttpStatus.CREATED).body(booking);
+	public ResponseEntity<String> book(@PathVariable String flightId, @RequestBody @Valid BookingRequestDto bookingDto) {
+		String pnr = bookingService.bookTicket(flightId, bookingDto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(pnr);
 	}
 	@GetMapping("/api/flight/ticket/{pnr}")
 	public Object history(@PathVariable String pnr){
