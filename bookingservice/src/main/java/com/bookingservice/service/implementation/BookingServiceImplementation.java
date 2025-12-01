@@ -17,6 +17,7 @@ import com.bookingservice.dto.FlightInventoryDto;
 import com.bookingservice.dto.PassengerDto;
 import com.bookingservice.exception.NotFoundException;
 import com.bookingservice.feign.FlightInterface;
+import com.bookingservice.kafka.BookingProducer;
 import com.bookingservice.model.BOOKING_STATUS;
 import com.bookingservice.model.Booking;
 import com.bookingservice.model.GENDER;
@@ -36,6 +37,9 @@ public class BookingServiceImplementation implements BookingService {
 
 	@Autowired
 	PassengerRepository passengerRepo;
+	
+	@Autowired
+	BookingProducer bookingProducer;
 
 	public Booking bookTicket(String inventoryId, BookingRequestDto bookingDto) {
 
@@ -53,9 +57,8 @@ public class BookingServiceImplementation implements BookingService {
 
 		Booking booking = Booking.builder().pnr(pnr)
 				.email(bookingDto.getEmail()).bookingTime(LocalDateTime.now())
-				.departureTime(flightInventory.getDepartureTime())
-				.arrivalTime(flightInventory.getArrivalTime()).flightInventoryId(inventoryId)
-				.status(BOOKING_STATUS.BOOKED).build();
+				.departureTime(flightInventory.getDepartureTime()).arrivalTime(flightInventory.getArrivalTime())
+				.flightInventoryId(inventoryId).status(BOOKING_STATUS.BOOKED).build();
 
 		Booking savedBooking = bookingRepo.save(booking);
 
@@ -67,13 +70,16 @@ public class BookingServiceImplementation implements BookingService {
 		int seatsToBook = bookingDto.getPassengers().size();
 		flightClient.updateAvailableSeat(inventoryId, seatsToBook);
 		
+		bookingProducer.sendBookingEmail(bookingDto.getEmail(),pnr);
+		
 		return savedBooking;
 	}
 
 	private Passenger createPassenger(PassengerDto dto, String bookingId, String flightId) {
-	    return Passenger.builder().bookingId(bookingId)
-	            .flightInventoryId(flightId).name(dto.getName()).gender(GENDER.valueOf(dto.getGender().toUpperCase())).age(dto.getAge())
-	            .seatNumber(dto.getSeatNumber()).mealOption(dto.getMealOption()).build();
+	    return Passenger.builder().bookingId(bookingId).flightInventoryId(flightId)
+	            .name(dto.getName()).gender(GENDER.valueOf(dto.getGender()
+	            .toUpperCase())).age(dto.getAge()).seatNumber(dto.getSeatNumber())
+	            .mealOption(dto.getMealOption()).build();
 	}
 	public Object getHistory(String pnr) {
 		Booking currentBooking=bookingRepo.findByPnrAndStatus(pnr,BOOKING_STATUS.valueOf("BOOKED"));
@@ -96,7 +102,6 @@ public class BookingServiceImplementation implements BookingService {
 		if (bookings.isEmpty()) {
 		    throw new NotFoundException();
 		}
-
 	    List<Map<String, Object>> ticketList = new ArrayList<>();
 
 	    for (Booking booking : bookings) {

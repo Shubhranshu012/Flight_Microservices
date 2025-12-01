@@ -114,5 +114,15 @@ public class BookingTest {
 	                        .content(objectMapper.writeValueAsString(booking(passenger("Rohit", "MALE", 28, "12A", "")))))
 	                		.andExpect(status().isBadRequest());
 	    }
+	    @Test
+	    void testBookTicket_FlightServiceThrowsException() throws Exception {
+	        when(flightClient.searchFlight(anyString())).thenThrow(new RuntimeException("Flight service down"));
+
+	        BookingRequestDto dto = validBooking();
+	        mockMvc.perform(post("/api/flight/booking/" + inventoryId)
+	                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(dto)))
+	                		.andExpect(status().isNotFound());
+	    }
+	    
 }
 

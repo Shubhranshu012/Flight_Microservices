@@ -41,20 +41,28 @@ public class FlightServiceImplment implements FlightService {
     	if(inventoryDto.getFromPlace().equals(inventoryDto.getToPlace())) {
     		throw new BadRequestException("From To Cant be Same");
     	}
+    	AIRPORT_NAME source;
+    	AIRPORT_NAME destination;
     	
-    	Optional<FlightInventory> duplicate = inventoryRepo.findByAirlineAndFlightIdAndSourceAndDestinationAndDepartureTime(inventoryDto.getAirlineName(),inventoryDto.getFlightNumber(),AIRPORT_NAME.valueOf(inventoryDto.getFromPlace()),AIRPORT_NAME.valueOf(inventoryDto.getToPlace()),inventoryDto.getDepartureTime());
+    	try {
+    		source=AIRPORT_NAME.valueOf((inventoryDto.getToPlace()).toUpperCase());
+    		destination=AIRPORT_NAME.valueOf((inventoryDto.getFromPlace()).toUpperCase());
+    	}catch (Exception exc) {
+    		throw new BadRequestException("Invalid Source or Destination");
+    	}
+    	Optional<FlightInventory> duplicate = inventoryRepo.findByAirlineAndFlightIdAndSourceAndDestinationAndDepartureTime(inventoryDto.getAirlineName(),inventoryDto.getFlightNumber(),source,destination,inventoryDto.getDepartureTime());
 
     	if (duplicate.isPresent()) {
     	        throw new BadRequestException("Flight already exists with same details (airline, flightNumber, route, departureTime)");
     	}
     	
     	flightRepo.findById(inventoryDto.getFlightNumber()).orElseGet(() -> {
-    			Flight newFlight = Flight.builder().flightNumber(inventoryDto.getFlightNumber()).airlineName(inventoryDto.getAirlineName()).fromPlace(AIRPORT_NAME.valueOf(inventoryDto.getFromPlace())).toPlace(AIRPORT_NAME.valueOf(inventoryDto.getToPlace())).build();
+    			Flight newFlight = Flight.builder().flightNumber(inventoryDto.getFlightNumber()).airlineName(inventoryDto.getAirlineName()).fromPlace(source).toPlace(destination).build();
     			return flightRepo.save(newFlight);
     	});
 
     	FlightInventory fi = FlightInventory.builder().flightId(inventoryDto.getFlightNumber()).departureTime(inventoryDto.getDepartureTime()).arrivalTime(inventoryDto.getArrivalTime()).price(inventoryDto.getPrice())
-    			.totalSeats(inventoryDto.getTotalSeats()).availableSeats(inventoryDto.getAvailableSeats()).source(AIRPORT_NAME.valueOf(inventoryDto.getFromPlace())).destination(AIRPORT_NAME.valueOf(inventoryDto.getToPlace())).airline(inventoryDto.getAirlineName()).build();
+    			.totalSeats(inventoryDto.getTotalSeats()).availableSeats(inventoryDto.getAvailableSeats()).source(source).destination(destination).airline(inventoryDto.getAirlineName()).build();
 
     	return inventoryRepo.save(fi);
     }
@@ -65,8 +73,16 @@ public class FlightServiceImplment implements FlightService {
 
         LocalDateTime onwardStart = dto.getJourneyDate().atStartOfDay();
         LocalDateTime onwardEnd = dto.getJourneyDate().atTime(23, 59, 59);
-
-        List<FlightInventory> onwardFlights =inventoryRepo.findBySourceAndDestinationAndDepartureTimeBetween(AIRPORT_NAME.valueOf(dto.getFromPlace()),AIRPORT_NAME.valueOf(dto.getToPlace()),onwardStart,onwardEnd );
+        AIRPORT_NAME source;
+    	AIRPORT_NAME destination;
+    	
+    	try {
+    		source=AIRPORT_NAME.valueOf((dto.getToPlace()).toUpperCase());
+    		destination=AIRPORT_NAME.valueOf((dto.getFromPlace()).toUpperCase());
+    	}catch (Exception exc) {
+    		throw new BadRequestException("Invalid Source or Destination");
+    	}
+        List<FlightInventory> onwardFlights =inventoryRepo.findBySourceAndDestinationAndDepartureTimeBetween(source,destination,onwardStart,onwardEnd );
 
         if (onwardFlights.isEmpty()) {
             throw new NotFoundException();
@@ -83,7 +99,7 @@ public class FlightServiceImplment implements FlightService {
             LocalDateTime returnStart = dto.getReturnDate().atStartOfDay();
             LocalDateTime returnEnd = dto.getReturnDate().atTime(23, 59, 59);
 
-            List<FlightInventory> returnFlights =inventoryRepo.findBySourceAndDestinationAndDepartureTimeBetween(AIRPORT_NAME.valueOf(dto.getToPlace()),AIRPORT_NAME.valueOf(dto.getFromPlace()),returnStart,returnEnd);
+            List<FlightInventory> returnFlights =inventoryRepo.findBySourceAndDestinationAndDepartureTimeBetween(source,destination,returnStart,returnEnd);
 
             if (returnFlights.isEmpty()) {
                 throw new NotFoundException();
