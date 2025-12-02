@@ -1,5 +1,8 @@
 package com.bookingservice.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +25,11 @@ public class BookingController {
 	BookingServiceImplementation bookingService;
 
 	@PostMapping("/api/flight/booking/{flightId}")
-	public ResponseEntity<String> book(@PathVariable String flightId, @RequestBody @Valid BookingRequestDto bookingDto) {
+	public ResponseEntity<Map<String,String>> book(@PathVariable String flightId, @RequestBody @Valid BookingRequestDto bookingDto) {
 		String pnr = bookingService.bookTicket(flightId, bookingDto);
-		return ResponseEntity.status(HttpStatus.CREATED).body(pnr);
+		Map<String,String> responce=new HashMap<>();
+		responce.put("pnr", pnr);
+		return ResponseEntity.status(HttpStatus.CREATED).body(responce);
 	}
 	@GetMapping("/api/flight/ticket/{pnr}")
 	public Object history(@PathVariable String pnr){
