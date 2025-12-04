@@ -1,0 +1,91 @@
+{
+	"info": {
+		"_postman_id": "9f88d53c-d8a7-43fb-aea0-5edb6b4e922e",
+		"name": "MicroService_Fligth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "49371517"
+	},
+	"item": [
+		{
+			"name": "ADD Inventory",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"airlineName\": \"INDIGO\",\r\n  \"airlineLogo\": \"https://indigo.com/logo.png\",\r\n  \"fromPlace\": \"MUMBAI\",\r\n  \"toPlace\": \"DELHI\",\r\n  \"flightNumber\": \"6E-2339\",\r\n  \"departureTime\": \"2026-11-26T14:30:00\",\r\n  \"arrivalTime\": \"2026-11-26T16:20:00\",\r\n  \"price\": 4500,\r\n  \"totalSeats\": 180,\r\n  \"availableSeats\":180\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{flightURL}}/FLIGHTSERVICE/api/flight/airline/inventory"
+			},
+			"response": []
+		},
+		{
+			"name": "Search Flight",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"fromPlace\": \"MUMBAI\",\r\n  \"toPlace\": \"DELHI\",\r\n  \"journeyDate\": \"2026-11-27\",\r\n  \"tripType\": \"One_way\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{flightURL}}/FLIGHTSERVICE/api/flight/search"
+			},
+			"response": []
+		},
+		{
+			"name": "BookFlight",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"testuser@gmail.com\",\r\n  \"passengers\": [\r\n    {\r\n      \"name\": \"Rohit\",\r\n      \"gender\": \"MALE\",\r\n      \"age\": 28,\r\n      \"seatNumber\": \"134A\",\r\n      \"mealOption\": \"VEG\"\r\n    },\r\n    {\r\n      \"name\": \"Anita\", \r\n      \"gender\": \"FEMALE\",\r\n      \"age\": 25,\r\n      \"seatNumber\": \"122B\",\r\n      \"mealOption\": \"NON_VEG\"\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{flightURL}}/BOOKINGSERVICE/api/flight/booking/692dc71dbb13362f0714c7de"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Ticket Via pnr",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{flightURL}}/BOOKINGSERVICE/api/flight/ticket/PNR2B837797"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Ticker",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "{{flightURL}}/BOOKINGSERVICE/api/flight/booking/cancel/PNR2B837797"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Ticket Via Email",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{flightURL}}/BOOKINGSERVICE/api/flight/booking/history/testuser@gmail.com"
+			},
+			"response": []
+		}
+	]
+}
